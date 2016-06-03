@@ -28,7 +28,7 @@ range01 <- function(var, min, max) {
 }
 
 # ---------------- Prepare Links -----------------------
-nodes <- read.table(file = "AAL_Yan.csv", sep = ",", header = T)
+nodes <- read.table(file = "./Documents/github/fp-jyfeather/AAL_Yan.csv", sep = ",", header = T)
 dat.org <- read.table(file = "PET_AD.csv", sep = ",", header = T)
 dat.nodes <- dat.org[,nodes$name]
 
@@ -45,3 +45,6 @@ vis <- forceNetwork(Nodes = nodes, Links = res.links,
                     Value = "weight", NodeID = "name",
                     Group = "region", zoom = TRUE)
 saveNetwork(vis, file = "main.html")
+
+# -------------- Prepare Coordinates -------------------
+dat.cord <- read.table(file = "./Documents/github/fp-jyfeather/BrainRegions.csv", sep = ";")
