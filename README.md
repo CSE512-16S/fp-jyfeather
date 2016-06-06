@@ -14,7 +14,7 @@ There are three main innovations in this project:
 ## Running Instructions
 Two ways to access interactive brain connectivity network:
 
-1. access this link [http://cse512-16s.github.io/a3-jyfeather/](http://cse512-16s.github.io/a3-jyfeather/) with demo results.
+1. access this link [http://cse512-16s.github.io/fp-jyfeather/](http://cse512-16s.github.io/fp-jyfeather/) with demo results.
 2. download the master branch, run the file `main.R` in R with modifying the parameters, then move the result into the file `functional.json`; then run `jekyll serve`, and open the prompted web address, typically `127.0.0.1:4000`.
 
 ## Data Description

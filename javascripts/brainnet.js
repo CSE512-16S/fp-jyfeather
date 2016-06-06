@@ -104,7 +104,6 @@
       //.attr("r", function(d) { return size(d.size)||nominal_base_node_size; })
       .style("stroke-width", nominal_stroke)
       .style(towhite, "white");
-      
 
       var text = g.selectAll(".text")
       .data(graph.nodes)
