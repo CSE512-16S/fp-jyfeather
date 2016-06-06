@@ -23,21 +23,21 @@ var highlight_trans = 0.1;
 
 /* fig 1, x - y */
 var fig1 = d3.select("#xy")
-.append("svg")
-.attr("width", width+margin.left+margin.right)
-.attr("height", height+margin.top+margin.bottom);
+  .append("svg")
+  .attr("width", width+margin.left+margin.right)
+  .attr("height", height+margin.top+margin.bottom);
 
 /* fig 2, x - z */
 var fig2 = d3.select("#xz")
-.append("svg")
-.attr("width", width+margin.left+margin.right)
-.attr("height", height+margin.top+margin.bottom);
+  .append("svg")
+  .attr("width", width+margin.left+margin.right)
+  .attr("height", height+margin.top+margin.bottom);
 
 /* fig 3, x - z */
 var fig3 = d3.select("#yz")
-.append("svg")
-.attr("width", width+margin.left+margin.right)
-.attr("height", height+margin.top+margin.bottom);
+  .append("svg")
+  .attr("width", width+margin.left+margin.right)
+  .attr("height", height+margin.top+margin.bottom);
 
 /* read data and plot figures */
 d3.json("functional.json", function(error, json){
@@ -50,7 +50,8 @@ d3.json("functional.json", function(error, json){
       'z' : d.z*3,
       'fixed': true,
       'name' : d.name,
-      'group' : d.group
+      'group' : d.group,
+      'region' : d.region
     };
 
   });
@@ -112,19 +113,19 @@ d3.json("functional.json", function(error, json){
   .append("svg:g")
   .attr("class", "node");
 
-  var node1 = fig1.selectAll("g.node");
+  var node1 = fig1.selectAll("g.node")
 
   node1.append("circle")
   .attr("r", 10)
   .attr("cx", function(d) { return d.x; })
   .attr("cy", function(d) { return d.y; })
-  .style("fill", function(d) { return color(d.group); })
+  .style("fill", function(d) { return color(d.group); });
 
   // node1.append("text")
   // .attr("dx", 12)
   // .attr("dy", ".35em")
   // .style("text-anchor", "middle")
-  // .text(function(d) { return d.name; });
+  // .text(function(d) { return d.index; });
 
   node1.on("mouseover", function(d) {
     set_highlight(d);
@@ -178,6 +179,19 @@ d3.json("functional.json", function(error, json){
   .attr("cy", function(d) { return d.z; })
   .style("fill", function(d){return color(d.group);});
 
+  node2.on("mouseover", function(d) {
+    set_highlight(d);
+  })
+  .on("mousedown", function(d) {
+    d3.event.stopPropagation();
+    focus_node = d;
+    set_focus(d);
+    if (highlight_node === null) set_highlight(d);
+  })
+  .on("mouseout", function(d) {
+      exit_highlight();
+  });
+
   /* ------------- figure yz ---------------- */
   var force3 = d3.layout.force()
   .nodes(nodes)
@@ -217,14 +231,30 @@ d3.json("functional.json", function(error, json){
   .attr("cy", function(d) { return d.z; })
   .style("fill", function(d){return color(d.group);});
 
-  /* ------------- dictionary ---------------- */
+  node3.on("mouseover", function(d) {
+    set_highlight(d);
+  })
+  .on("mousedown", function(d) {
+    d3.event.stopPropagation();
+    focus_node = d;
+    set_focus(d);
+    if (highlight_node === null) set_highlight(d);
+  })
+  .on("mouseout", function(d) {
+      exit_highlight();
+  });
+
+  /* ------------- global setting -------------- */
   d3.select(window).on("mouseup", function() {
     if (focus_node!==null) {
       focus_node = null;
       if (highlight_trans<1) {
         node1.style("opacity", 1);
-        // text.style("opacity", 1);
         link1.style("opacity", 1);
+        node2.style("opacity", 1);
+        link2.style("opacity", 1);
+        node3.style("opacity", 1);
+        link3.style("opacity", 1);
       }
     }
 
@@ -258,14 +288,16 @@ d3.json("functional.json", function(error, json){
 
   function set_highlight(d) {
     fig1.style("cursor","pointer");
+    fig2.style("cursor","pointer");
+    fig3.style("cursor","pointer");
     if (focus_node!==null) d = focus_node;
     highlight_node = d;
 
     if (isHighlight != 1) {
       isHighlight = 1;
-      link1.style("stroke", function(o) {
-        return o.source.index == d.index || o.target.index == d.index ? highlight_link_color : ((isNumber(o.group) && o.group>=0)?color(o.group):default_link_color);
-      });
+      link1.style("stroke", function(o) { return o.source.index == d.index || o.target.index == d.index ? highlight_link_color : ((isNumber(o.group) && o.group>=0)?color(o.group):default_link_color); });
+      link2.style("stroke", function(o) { return o.source.index == d.index || o.target.index == d.index ? highlight_link_color : ((isNumber(o.group) && o.group>=0)?color(o.group):default_link_color); });
+      link3.style("stroke", function(o) { return o.source.index == d.index || o.target.index == d.index ? highlight_link_color : ((isNumber(o.group) && o.group>=0)?color(o.group):default_link_color); });
     }
   }
 
@@ -274,9 +306,21 @@ d3.json("functional.json", function(error, json){
       node1.style("opacity", function(o) {
         return isConnected(d, o) ? 1 : highlight_trans;
       });
+      node2.style("opacity", function(o) {
+        return isConnected(d, o) ? 1 : highlight_trans;
+      });
+      node3.style("opacity", function(o) {
+        return isConnected(d, o) ? 1 : highlight_trans;
+      });
       link1.style("opacity", function(o) {
         return o.source.index == d.index || o.target.index == d.index ? 1 : highlight_trans;
-      });   
+      });
+      link2.style("opacity", function(o) {
+        return o.source.index == d.index || o.target.index == d.index ? 1 : highlight_trans;
+      });
+      link3.style("opacity", function(o) {
+        return o.source.index == d.index || o.target.index == d.index ? 1 : highlight_trans;
+      });
     }
   }
 
@@ -284,10 +328,13 @@ d3.json("functional.json", function(error, json){
     highlight_node = null;
     if (focus_node===null) {
       fig1.style("cursor","move");
+      fig2.style("cursor","move");
+      fig3.style("cursor","move");
       if (isHighlight === 1) {
         isHighlight = 0;
-        link1.style("stroke", function(o) {
-          return (isNumber(o.group) && o.group>=0) ? color(o.group) : default_link_color;});
+        link1.style("stroke", function(o) {return (isNumber(o.group) && o.group>=0) ? color(o.group) : default_link_color;});
+        link2.style("stroke", function(o) {return (isNumber(o.group) && o.group>=0) ? color(o.group) : default_link_color;});
+        link3.style("stroke", function(o) {return (isNumber(o.group) && o.group>=0) ? color(o.group) : default_link_color;});
       }
     }
   }
@@ -295,5 +342,99 @@ d3.json("functional.json", function(error, json){
   function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
   } 
+
+
+  /* --------------------- dictionary table -------------------- */
+  // The table generation function
+  function tabulate(data, columns) {
+    var table = d3.select("#dict").append("table")
+                .attr("style", "margin-left: 50px"),
+        thead = table.append("thead"),
+        tbody = table.append("tbody");
+
+    // append the header row
+    thead.append("tr")
+        .selectAll("th")
+        .data(columns)
+        .enter()
+        .append("th")
+        .text(function(column) { return column; })
+        .style("font-size", "10px")
+        .style("border-bottom", "0px"); // no separate line between body and header
+
+    // create a row for each object in the data
+    var rows = tbody.selectAll("tr")
+        .data(data)
+        .enter()
+        .append("tr");
+
+    // create a cell in each row for each column
+    var cells = rows.selectAll("td")
+        .data(function(row) {
+            return columns.map(function(column) {
+                return {column: column, value: row[column]};
+            });
+        })
+        .enter()
+        .append("td")
+        .attr("style", "font-family: Courier") // sets the font style
+        .style("font-size", "7px")
+        .style("height", "8px")
+        .style("padding", "0px")
+        .style("margin", "0px")
+        .html(function(d) { return d.value; });
+    
+    return table;
+  }
+
+  // render the table
+  var dictionary = tabulate(json.nodes, ["id", "name", "region"]);
 });
 
+// /* ------------- dictionary ---------------- */
+// d3.csv("AAL_Yan.csv", function(error, data) {
+//   // The table generation function
+//   function tabulate(data, columns) {
+//     var table = d3.select("#dict").append("table")
+//                 .attr("style", "margin-left: 50px"),
+//         thead = table.append("thead"),
+//         tbody = table.append("tbody");
+
+//     // append the header row
+//     thead.append("tr")
+//         .selectAll("th")
+//         .data(columns)
+//         .enter()
+//         .append("th")
+//         .text(function(column) { return column; })
+//         .style("font-size", "10px")
+//         .style("border-bottom", "0px"); // no separate line between body and header
+
+//     // create a row for each object in the data
+//     var rows = tbody.selectAll("tr")
+//         .data(data)
+//         .enter()
+//         .append("tr");
+
+//     // create a cell in each row for each column
+//     var cells = rows.selectAll("td")
+//         .data(function(row) {
+//             return columns.map(function(column) {
+//                 return {column: column, value: row[column]};
+//             });
+//         })
+//         .enter()
+//         .append("td")
+//         .attr("style", "font-family: Courier") // sets the font style
+//         .style("font-size", "6px")
+//         .style("height", "8px")
+//         .style("padding", "0px")
+//         .style("margin", "0px")
+//         .html(function(d) { return d.value; });
+    
+//     return table;
+//   }
+
+//   // render the table
+//   var dictionary = tabulate(data, ["id", "name", "region"]);
+// });
